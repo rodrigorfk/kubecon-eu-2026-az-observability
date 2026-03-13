@@ -7,6 +7,7 @@ metadata:
 spec:
   replicas: 1
   serviceAccountName: prometheus-agent
+  replicaExternalLabelName: ""
   # -- AZ-aware scrape filtering via default scrapeClass --
   # The overlay patches the regex with the target AZ value.
   # Supports kubernetes_sd (pod annotation + label + node label) and ec2_sd (availability zone meta).
