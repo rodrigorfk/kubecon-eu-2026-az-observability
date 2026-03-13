@@ -1,0 +1,77 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+kubeadmConfigPatches:
+  - |
+    kind: KubeProxyConfiguration
+    metricsBindAddress: 0.0.0.0:10249
+  - |
+    kind: ClusterConfiguration
+    controllerManager:
+      extraArgs:
+        bind-address: 0.0.0.0
+    scheduler:
+      extraArgs:
+        bind-address: 0.0.0.0
+    etcd:
+      local:
+        extraArgs:
+          listen-metrics-urls: http://0.0.0.0:2381
+nodes:
+  # Control plane (ingress entry point — exposes 80 to the host)
+  - role: control-plane
+    image: kindest/node:v1.35.1
+    labels:
+      topology.kubernetes.io/region: eu-west-1
+      topology.kubernetes.io/zone: eu-west-1a
+      ingress-ready: "true"
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 80
+        protocol: TCP
+  - role: control-plane
+    image: kindest/node:v1.35.1
+    labels:
+      topology.kubernetes.io/region: eu-west-1
+      topology.kubernetes.io/zone: eu-west-1b
+
+  # AZ a — worker 1
+  - role: worker
+    image: kindest/node:v1.35.1
+    labels:
+      topology.kubernetes.io/region: eu-west-1
+      topology.kubernetes.io/zone: eu-west-1a
+
+  # AZ a — worker 2
+  - role: worker
+    image: kindest/node:v1.35.1
+    labels:
+      topology.kubernetes.io/region: eu-west-1
+      topology.kubernetes.io/zone: eu-west-1a
+
+  # AZ b — worker 1
+  - role: worker
+    image: kindest/node:v1.35.1
+    labels:
+      topology.kubernetes.io/region: eu-west-1
+      topology.kubernetes.io/zone: eu-west-1b
+
+  # AZ b — worker 2
+  - role: worker
+    image: kindest/node:v1.35.1
+    labels:
+      topology.kubernetes.io/region: eu-west-1
+      topology.kubernetes.io/zone: eu-west-1b
+
+  # AZ c — worker 1
+  - role: worker
+    image: kindest/node:v1.35.1
+    labels:
+      topology.kubernetes.io/region: eu-west-1
+      topology.kubernetes.io/zone: eu-west-1c
+
+  # AZ c — worker 2
+  - role: worker
+    image: kindest/node:v1.35.1
+    labels:
+      topology.kubernetes.io/region: eu-west-1
+      topology.kubernetes.io/zone: eu-west-1c

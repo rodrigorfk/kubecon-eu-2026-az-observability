@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: "eu-west-1b-"
+
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: PrometheusAgent
+      name: prometheus-agent
+    patch: |
+      - op: replace
+        path: /spec/nodeSelector/topology.kubernetes.io~1zone
+        value: eu-west-1b
+      - op: replace
+        path: /spec/externalLabels/availability_zone
+        value: eu-west-1b
+      - op: replace
+        path: /spec/scrapeClasses/0/relabelings/0/regex
+        value: "(eu-west-1b;.*|.*;eu-west-1b)"
+  - target:
+      kind: Service
+      name: prometheus-agent
+    patch: |
+      - op: replace
+        path: /spec/selector/operator.prometheus.io~1name
+        value: eu-west-1b-prometheus-agent
+  - target:
+      kind: HTTPRoute
+      name: prometheus-agent
+    patch: |
+      - op: replace
+        path: /spec/hostnames/0
+        value: prometheus-agent-1b.127.0.0.1.nip.io
+      - op: replace
+        path: /spec/rules/0/backendRefs/0/name
+        value: eu-west-1b-prometheus-agent

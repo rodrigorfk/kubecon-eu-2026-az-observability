@@ -1,0 +1,78 @@
+# This file contains the base Gateway API resources for the Envoy Gateway setup.
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: eg
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+---
+# EnvoyProxy — pin to the Kind control-plane node with extraPortMappings
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: kind-proxy
+  namespace: monitoring
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyDeployment:
+        replicas: 1
+        pod:
+          nodeSelector:
+            ingress-ready: "true"
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+      envoyService:
+        type: NodePort
+        patch:
+          type: StrategicMerge
+          value:
+            spec:
+              ports:
+              - name: http
+                nodePort: 30080
+                port: 80
+                protocol: TCP
+                targetPort: 10080
+---
+# Gateway — uses the EnvoyProxy config above
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: monitoring-gateway
+  namespace: monitoring
+spec:
+  gatewayClassName: eg
+  infrastructure:
+    parametersRef:
+      group: gateway.envoyproxy.io
+      kind: EnvoyProxy
+      name: kind-proxy
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+---
+# HTTPRoute — prometheus.127.0.0.1.nip.io -> prometheus-server:9090
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: prometheus-server
+  namespace: monitoring
+spec:
+  parentRefs:
+    - name: monitoring-gateway
+      namespace: monitoring
+  hostnames:
+    - "prometheus.127.0.0.1.nip.io"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: prometheus-server
+          port: 9090

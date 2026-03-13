@@ -1,0 +1,40 @@
+# Base PrometheusAgent — overlays patch: name, nodeSelector, externalLabels, scrapeClasses regex
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: PrometheusAgent
+metadata:
+  name: prometheus-agent
+  namespace: monitoring
+spec:
+  replicas: 1
+  serviceAccountName: prometheus-agent
+  # -- AZ-aware scrape filtering via default scrapeClass --
+  # The overlay patches the regex with the target AZ value.
+  scrapeClasses:
+    - name: az-filter
+      default: true
+      relabelings:
+        - sourceLabels:
+            - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+            - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
+          regex: "(PLACEHOLDER;.*|.*;PLACEHOLDER)"
+          action: keep
+  # Pin agent to its AZ — overlay patches the zone value
+  nodeSelector:
+    topology.kubernetes.io/zone: PLACEHOLDER
+  externalLabels:
+    cluster: playground
+    availability_zone: PLACEHOLDER
+  # Discover all ServiceMonitors and PodMonitors
+  serviceMonitorSelector: {}
+  serviceMonitorNamespaceSelector: {}
+  podMonitorSelector: {}
+  podMonitorNamespaceSelector: {}
+  # Remote-write to the centralized Prometheus TSDB
+  remoteWrite:
+    - url: http://prometheus-server.monitoring.svc.cluster.local:9090/api/v1/write
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi

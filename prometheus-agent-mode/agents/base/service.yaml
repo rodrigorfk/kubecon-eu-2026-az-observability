@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-agent
+  namespace: monitoring
+spec:
+  type: ClusterIP
+  selector:
+    operator.prometheus.io/name: PLACEHOLDER
+  ports:
+    - name: web
+      port: 9090
+      targetPort: 9090
+      protocol: TCP

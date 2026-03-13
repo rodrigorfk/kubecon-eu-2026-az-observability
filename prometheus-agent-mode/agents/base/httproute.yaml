@@ -1,0 +1,21 @@
+# HTTPRoute for the agent web UI (targets, service discovery)
+# The namePrefix from each overlay will adjust the hostname and service name
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: prometheus-agent
+  namespace: monitoring
+spec:
+  parentRefs:
+    - name: monitoring-gateway
+      namespace: monitoring
+  hostnames:
+    - "agent-PLACEHOLDER.127.0.0.1.nip.io"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: prometheus-agent-prometheus-agent
+          port: 9090
