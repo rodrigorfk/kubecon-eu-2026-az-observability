@@ -61,6 +61,10 @@ spec:
         resources:
           requests:
             storage: 10Gi
+  # Load all PrometheusRules — recording & alerting rules run here,
+  # not on the agents (PrometheusAgent does not support rules).
+  ruleSelector: {}
+  ruleNamespaceSelector: {}
   # The server does NOT scrape anything — agents do all the scraping
   serviceMonitorSelector:
     matchLabels:
