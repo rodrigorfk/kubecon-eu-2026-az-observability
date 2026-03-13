@@ -17,5 +17,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: prometheus-agent-prometheus-agent
+        - name: PLACEHOLDER
           port: 9090
