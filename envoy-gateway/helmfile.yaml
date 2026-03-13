@@ -1,0 +1,10 @@
+releases:
+  - name: envoy-gateway
+    namespace: envoy-gateway-system
+    createNamespace: true
+    chart: oci://docker.io/envoyproxy/gateway-helm
+    version: "1.7.1"
+    values:
+      - values/envoy-gateway.yaml
+    wait: true
+    waitForJobs: true
