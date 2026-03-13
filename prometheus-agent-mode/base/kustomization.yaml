@@ -5,4 +5,5 @@ resources:
   - namespace.yaml
   - rbac.yaml
   - prometheus-server.yaml
+  - scrapeconfig-kubelet.yaml
   - gateway.yaml

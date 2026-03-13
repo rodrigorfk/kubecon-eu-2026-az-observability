@@ -6,6 +6,10 @@ crds:
 
 prometheusOperator:
   enabled: true
+  # Disable kubelet Endpoints/EndpointSlice sync — we use ScrapeConfigs
+  # with kubernetes_sd node role instead of a ServiceMonitor for kubelet.
+  kubeletService:
+    enabled: false
 
 # Disabled — we manage our own Prometheus server and per-AZ agents
 prometheus:
@@ -32,8 +36,11 @@ defaultRules:
 kubeApiServer:
   enabled: true
 
+# Disabled — kubelet Endpoints/EndpointSlices don't carry topology labels,
+# so the AZ-aware scrapeClass cannot filter them. We use a ScrapeConfig with
+# kubernetes_sd node role instead (see base/scrapeconfig-kubelet.yaml).
 kubelet:
-  enabled: true
+  enabled: false
 
 kubeControllerManager:
   enabled: true

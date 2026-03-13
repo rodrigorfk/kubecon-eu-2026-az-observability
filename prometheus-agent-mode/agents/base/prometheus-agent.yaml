@@ -9,7 +9,7 @@ spec:
   serviceAccountName: prometheus-agent
   # -- AZ-aware scrape filtering via default scrapeClass --
   # The overlay patches the regex with the target AZ value.
-  # Supports kubernetes_sd (pod annotation + label) and ec2_sd (availability zone meta).
+  # Supports kubernetes_sd (pod annotation + label + node label) and ec2_sd (availability zone meta).
   scrapeClasses:
     - name: az-filter
       default: true
@@ -19,6 +19,19 @@ spec:
             - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
             - __meta_ec2_availability_zone
           regex: ".*PLACEHOLDER.*"
+          action: keep
+    - name: az-filter-kubelet
+      default: false
+      authorization:
+        type: Bearer
+        credentialsFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      tlsConfig:
+        caFile: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+        insecureSkipVerify: true
+      relabelings:
+        - sourceLabels:
+            - __meta_kubernetes_node_label_topology_kubernetes_io_zone
+          regex: "PLACEHOLDER"
           action: keep
   # Pin agent to its AZ — overlay patches the zone value
   nodeSelector:
@@ -31,6 +44,9 @@ spec:
   serviceMonitorNamespaceSelector: {}
   podMonitorSelector: {}
   podMonitorNamespaceSelector: {}
+  # Discover ScrapeConfigs (e.g. kubelet via node role)
+  scrapeConfigSelector: {}
+  scrapeConfigNamespaceSelector: {}
   # Remote-write to the centralized Prometheus TSDB
   remoteWrite:
     - url: http://prometheus-server.monitoring.svc.cluster.local:9090/api/v1/write
