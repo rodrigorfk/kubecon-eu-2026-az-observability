@@ -19,7 +19,7 @@ patches:
         value: eu-west-1c
       - op: replace
         path: /spec/scrapeClasses/0/relabelings/0/regex
-        value: "(eu-west-1c;.*|.*;eu-west-1c)"
+        value: ".*eu-west-1c.*"
   - target:
       kind: Service
       name: prometheus-agent

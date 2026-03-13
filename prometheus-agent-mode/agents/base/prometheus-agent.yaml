@@ -9,6 +9,7 @@ spec:
   serviceAccountName: prometheus-agent
   # -- AZ-aware scrape filtering via default scrapeClass --
   # The overlay patches the regex with the target AZ value.
+  # Supports kubernetes_sd (pod annotation + label) and ec2_sd (availability zone meta).
   scrapeClasses:
     - name: az-filter
       default: true
@@ -16,7 +17,8 @@ spec:
         - sourceLabels:
             - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
             - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
-          regex: "(PLACEHOLDER;.*|.*;PLACEHOLDER)"
+            - __meta_ec2_availability_zone
+          regex: ".*PLACEHOLDER.*"
           action: keep
   # Pin agent to its AZ — overlay patches the zone value
   nodeSelector:
