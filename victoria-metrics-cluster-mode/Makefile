@@ -35,9 +35,12 @@ deploy-operator: ## Install prometheus-operator + victoriametrics-operator via h
 	@$(KUBECTL) -n monitoring rollout status deployment -l app.kubernetes.io/name=victoria-metrics-operator --timeout=$(TIMEOUT) > /dev/null
 	@echo " ✓ victoriametrics-operator ready"
 
-deploy-base: ## Apply base resources (federated vmselect, VMAlert, gateway)
+deploy-base: ## Apply base resources (federated vmselect, VMAlert, alertmanager, gateway)
 	@$(KUBECTL) apply -k base/ > /dev/null
 	@echo " ✓ Base resources applied"
+	@echo "Waiting for alertmanager..."
+	@$(KUBECTL) -n monitoring rollout status statefulset/alertmanager-kube-prometheus-stack-alertmanager --timeout=$(TIMEOUT) > /dev/null
+	@echo " ✓ Alertmanager ready"
 
 deploy-clusters: ## Apply per-AZ VMCluster overlays
 	@for zone in $(ZONES); do \
@@ -67,6 +70,10 @@ deploy-agents: ## Apply per-AZ VMAgent overlays
 			vmagent/zone-$$short-vmagent --timeout=$(TIMEOUT) > /dev/null; \
 		echo " ✓ VMAgent zone-$$short operational"; \
 	done
+	@echo "Waiting for VMAlert to become operational..."
+	@$(KUBECTL) -n monitoring wait --for=jsonpath='{.status.updateStatus}'=operational \
+		vmalert/vmalert --timeout=$(TIMEOUT) > /dev/null
+	@echo " ✓ VMAlert operational"
 
 # ──────────────────────────────────────────────
 # Destroy (reverse order)
@@ -119,6 +126,7 @@ status: ## Show VM resources and access URLs
 	@echo "=== Access ==="
 	@echo "  Federated vmselect: http://vmselect.127.0.0.1.nip.io/select/0/vmui/"
 	@echo "  VMAlert:            http://vmalert.127.0.0.1.nip.io"
+	@echo "  Alertmanager:       http://alertmanager.127.0.0.1.nip.io"
 	@for zone in $(ZONES); do \
 		short=$$(echo $$zone | sed 's/.*-//'); \
 		echo "  vmselect ($$zone):  http://vmselect-$$short.127.0.0.1.nip.io/select/0/vmui/"; \

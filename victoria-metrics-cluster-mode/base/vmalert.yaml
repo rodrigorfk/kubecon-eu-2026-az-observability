@@ -13,6 +13,8 @@ spec:
     url: http://vmagent-catchall.monitoring.svc.cluster.local:8429/api/v1/write
   remoteRead:
     url: http://vmselect-federated.monitoring.svc.cluster.local:8481/select/0/prometheus
+  notifiers:
+    - url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
   selectAllByDefault: true
   resources:
     requests:

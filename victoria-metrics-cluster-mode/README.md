@@ -151,6 +151,7 @@ Once deployed, the following endpoints are available from the host:
 |----------------------|-------------------------------------------------------------|
 | Federated vmselect   | http://vmselect.127.0.0.1.nip.io/select/0/vmui/       |
 | VMAlert              | http://vmalert.127.0.0.1.nip.io                            |
+| Alertmanager         | http://alertmanager.127.0.0.1.nip.io                       |
 | vmselect (eu-west-1a)| http://vmselect-1a.127.0.0.1.nip.io/select/0/vmui/   |
 | vmselect (eu-west-1b)| http://vmselect-1b.127.0.0.1.nip.io/select/0/vmui/   |
 | vmselect (eu-west-1c)| http://vmselect-1c.127.0.0.1.nip.io/select/0/vmui/   |

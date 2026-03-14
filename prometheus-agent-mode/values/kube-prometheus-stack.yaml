@@ -16,7 +16,7 @@ prometheus:
   enabled: false
 
 alertmanager:
-  enabled: false
+  enabled: true
 
 grafana:
   enabled: false
