@@ -6,6 +6,15 @@ crds:
 
 prometheusOperator:
   enabled: true
+  env:
+    GOMAXPROCS: "1"
+    GOMEMLIMIT: "256MiB"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
   # Disable kubelet Endpoints/EndpointSlice sync — we use ScrapeConfigs
   # with kubernetes_sd node role instead of a ServiceMonitor for kubelet.
   kubeletService:
@@ -17,6 +26,15 @@ prometheus:
 
 alertmanager:
   enabled: true
+  enableFeatures:
+    - auto-gomemlimit
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
 
 grafana:
   enabled: false

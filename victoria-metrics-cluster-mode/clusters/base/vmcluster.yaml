@@ -10,6 +10,13 @@ spec:
 
   vminsert:
     replicaCount: 1
+    extraEnvs:
+      - name: GOMAXPROCS
+        value: "1"
+      - name: GOMEMLIMIT
+        valueFrom:
+          resourceFieldRef:
+            resource: limits.memory
     resources:
       requests:
         cpu: 50m
@@ -28,6 +35,13 @@ spec:
           resources:
             requests:
               storage: 5Gi
+    extraEnvs:
+      - name: GOMAXPROCS
+        value: "1"
+      - name: GOMEMLIMIT
+        valueFrom:
+          resourceFieldRef:
+            resource: limits.memory
     resources:
       requests:
         cpu: 50m
@@ -42,6 +56,13 @@ spec:
     # Expose cluster-native protocol for multi-level vmselect federation.
     extraArgs:
       clusternativeListenAddr: ":8401"
+    extraEnvs:
+      - name: GOMAXPROCS
+        value: "1"
+      - name: GOMEMLIMIT
+        valueFrom:
+          resourceFieldRef:
+            resource: limits.memory
     resources:
       requests:
         cpu: 50m

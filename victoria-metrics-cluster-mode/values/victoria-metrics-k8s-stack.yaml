@@ -10,6 +10,19 @@ victoria-metrics-operator:
   operator:
     # Auto-convert prometheus-operator CRDs (ServiceMonitor → VMServiceScrape, etc.)
     disable_prometheus_converter: false
+  env:
+    - name: GOMAXPROCS
+      value: "1"
+    - name: GOMEMLIMIT
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
 
 # Disable all VM instances — we create our own via kustomize
 vmsingle:

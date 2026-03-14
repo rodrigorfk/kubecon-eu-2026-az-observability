@@ -18,7 +18,7 @@ patches:
         path: /spec/externalLabels/availability_zone
         value: eu-west-1c
       - op: replace
-        path: /spec/extraEnvs/4/value
+        path: /spec/extraEnvs/3/value
         value: ''
       - op: replace
         path: /spec/remoteWrite/0/url

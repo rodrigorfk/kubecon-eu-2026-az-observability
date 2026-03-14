@@ -52,10 +52,10 @@ spec:
   extraEnvs:
     - name: GOMAXPROCS
       value: "1"
-    - name: GOGC
-      value: "400"
     - name: GOMEMLIMIT
-      value: 435MiB
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
     - name: ZONE_NAME
       valueFrom:
         fieldRef:

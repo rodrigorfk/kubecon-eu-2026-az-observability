@@ -48,6 +48,13 @@ spec:
               port: http
             initialDelaySeconds: 10
             periodSeconds: 30
+          env:
+            - name: GOMAXPROCS
+              value: "1"
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
           resources:
             requests:
               cpu: 50m

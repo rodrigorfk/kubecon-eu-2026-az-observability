@@ -16,6 +16,13 @@ spec:
   notifiers:
     - url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
   selectAllByDefault: true
+  extraEnvs:
+    - name: GOMAXPROCS
+      value: "1"
+    - name: GOMEMLIMIT
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
   resources:
     requests:
       cpu: 50m
