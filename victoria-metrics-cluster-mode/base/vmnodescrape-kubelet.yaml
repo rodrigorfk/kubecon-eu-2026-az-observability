@@ -1,0 +1,132 @@
+# Kubelet metrics via VMNodeScrape (native VM operator CRD).
+# Replaces the kube-prometheus-stack kubelet ServiceMonitor because Endpoints
+# created by the operator don't carry topology labels, making AZ-aware
+# filtering impossible. With VMNodeScrape (kubernetes_sd node role), the
+# VMAgent's nodeScrapeRelabelTemplate handles AZ filtering via
+# __meta_kubernetes_node_label_topology_kubernetes_io_zone.
+#
+# This mirrors the 3 endpoints from the original ServiceMonitor:
+#   1. /metrics          — kubelet own metrics
+#   2. /metrics/cadvisor — container metrics
+#   3. /metrics/probes   — probe metrics
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMNodeScrape
+metadata:
+  name: kubelet
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: kubelet
+spec:
+  scheme: https
+  honorLabels: true
+  honorTimestamps: true
+  bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+  tlsConfig:
+    caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    insecureSkipVerify: true
+  relabelConfigs:
+    - action: replace
+      sourceLabels:
+        - __meta_kubernetes_node_name
+      targetLabel: node
+    - action: replace
+      sourceLabels:
+        - __metrics_path__
+      targetLabel: metrics_path
+  metricRelabelConfigs:
+    - action: drop
+      sourceLabels:
+        - __name__
+        - le
+      regex: (csi_operations|storage_operation_duration)_seconds_bucket;(0.25|2.5|15|25|120|600)(\.0)?
+---
+# Kubelet cadvisor metrics
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMNodeScrape
+metadata:
+  name: kubelet-cadvisor
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: kubelet
+spec:
+  path: /metrics/cadvisor
+  scheme: https
+  honorLabels: true
+  honorTimestamps: true
+  interval: 10s
+  bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+  tlsConfig:
+    caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    insecureSkipVerify: true
+  relabelConfigs:
+    - action: replace
+      sourceLabels:
+        - __meta_kubernetes_node_name
+      targetLabel: node
+    - action: replace
+      sourceLabels:
+        - __metrics_path__
+      targetLabel: metrics_path
+  metricRelabelConfigs:
+    - action: drop
+      sourceLabels:
+        - __name__
+      regex: container_cpu_(cfs_throttled_seconds_total|load_average_10s|system_seconds_total|user_seconds_total)
+    - action: drop
+      sourceLabels:
+        - __name__
+      regex: container_fs_(io_current|io_time_seconds_total|io_time_weighted_seconds_total|reads_merged_total|sector_reads_total|sector_writes_total|writes_merged_total)
+    - action: drop
+      sourceLabels:
+        - __name__
+      regex: container_memory_(mapped_file|swap)
+    - action: drop
+      sourceLabels:
+        - __name__
+      regex: container_(file_descriptors|tasks_state|threads_max)
+    - action: drop
+      sourceLabels:
+        - __name__
+        - scope
+      regex: container_memory_failures_total;hierarchy
+    - action: drop
+      sourceLabels:
+        - __name__
+        - interface
+      regex: container_network_.*;(cali|cilium|cni|lxc|nodelocaldns|tunl).*
+    - action: drop
+      sourceLabels:
+        - __name__
+      regex: container_spec.*
+    - action: drop
+      sourceLabels:
+        - id
+        - pod
+      regex: .+;
+---
+# Kubelet probes metrics
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMNodeScrape
+metadata:
+  name: kubelet-probes
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: kubelet
+spec:
+  path: /metrics/probes
+  scheme: https
+  honorLabels: true
+  honorTimestamps: true
+  bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+  tlsConfig:
+    caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    insecureSkipVerify: true
+  relabelConfigs:
+    - action: replace
+      sourceLabels:
+        - __meta_kubernetes_node_name
+      targetLabel: node
+    - action: replace
+      sourceLabels:
+        - __metrics_path__
+      targetLabel: metrics_path

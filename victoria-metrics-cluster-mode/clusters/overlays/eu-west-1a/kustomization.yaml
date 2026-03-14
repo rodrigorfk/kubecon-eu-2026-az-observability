@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: "vm-eu-west-1a-"
+
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: VMCluster
+      name: vmcluster
+    patch: |
+      - op: replace
+        path: /spec/vminsert/nodeSelector/topology.kubernetes.io~1zone
+        value: eu-west-1a
+      - op: replace
+        path: /spec/vmstorage/nodeSelector/topology.kubernetes.io~1zone
+        value: eu-west-1a
+      - op: replace
+        path: /spec/vmselect/nodeSelector/topology.kubernetes.io~1zone
+        value: eu-west-1a
+  - target:
+      kind: HTTPRoute
+      name: vmselect
+    patch: |
+      - op: replace
+        path: /spec/hostnames/0
+        value: vmselect-1a.127.0.0.1.nip.io
+      - op: replace
+        path: /spec/rules/0/backendRefs/0/name
+        value: vmselect-vm-eu-west-1a-vmcluster

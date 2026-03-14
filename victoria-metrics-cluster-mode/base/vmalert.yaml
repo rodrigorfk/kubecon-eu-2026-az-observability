@@ -1,0 +1,22 @@
+# VMAlert — evaluates VMRules (auto-converted from PrometheusRules).
+# Reads from the federated vmselect, writes back via the catch-all VMAgent service.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlert
+metadata:
+  name: vmalert
+  namespace: monitoring
+spec:
+  replicaCount: 1
+  datasource:
+    url: http://vmselect-federated.monitoring.svc.cluster.local:8481/select/0/prometheus
+  remoteWrite:
+    url: http://vmagent-catchall.monitoring.svc.cluster.local:8429/api/v1/write
+  remoteRead:
+    url: http://vmselect-federated.monitoring.svc.cluster.local:8481/select/0/prometheus
+  selectAllByDefault: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi

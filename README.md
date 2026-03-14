@@ -95,12 +95,14 @@ Without this, kube-proxy and other components fail with `too many open files`.
 
 ```
 playground/
-├── Makefile                  # Cluster lifecycle management
-├── kind-config.yaml          # Kind cluster definition (8 nodes, 3 AZs, HA control plane)
-├── README.md                 # This file
-├── envoy-gateway/            # Ingress controller setup (Envoy Gateway + Gateway API)
+├── Makefile                       # Cluster lifecycle management
+├── kind-config.yaml               # Kind cluster definition (8 nodes, 3 AZs, HA control plane)
+├── README.md                      # This file
+├── envoy-gateway/                 # Ingress controller setup (Envoy Gateway + Gateway API)
 │   └── README.md
-└── prometheus-agent-mode/    # AZ-aware Prometheus agents + central server
+├── prometheus-agent-mode/         # AZ-aware Prometheus agents + central server
+│   └── README.md
+└── victoria-metrics-cluster-mode/ # Full AZ-isolated VictoriaMetrics stack
     └── README.md
 ```
 
@@ -112,17 +114,24 @@ See [envoy-gateway/README.md](envoy-gateway/README.md) for details.
 
 ## Deploying the Observability Stack
 
-Once the cluster is running, deploy the AZ-aware Prometheus setup:
+Two observability platforms are available — choose one:
+
+### Option 1: Prometheus Agent Mode (AZ-aware collection only)
+
+Demonstrates AZ-aware metrics **collection** with per-AZ PrometheusAgents, but uses a single centralized Prometheus server (cross-AZ ingestion not solved).
 
 ```bash
-cd prometheus-agent-mode
-make deploy
+cd prometheus-agent-mode && make deploy
 ```
 
-This deploys:
-- **prometheus-operator** + node-exporter + kube-state-metrics (via kube-prometheus-stack)
-- **Prometheus server** — centralized TSDB with remote-write receiver and PrometheusRules
-- **3 per-AZ PrometheusAgents** — each scrapes only targets in its availability zone
-- **Kubelet ScrapeConfigs** — replacing the default ServiceMonitor for AZ-aware kubelet scraping
+See [prometheus-agent-mode/README.md](prometheus-agent-mode/README.md) for details.
 
-See [prometheus-agent-mode/README.md](prometheus-agent-mode/README.md) for the full architecture and usage.
+### Option 2: VictoriaMetrics Cluster Mode (full AZ isolation)
+
+Complete end-to-end AZ isolation: per-AZ VMAgent → per-AZ VMCluster (vminsert/vmstorage/vmselect) → federated vmselect → VMAlert. Zero cross-AZ traffic for the observability pipeline.
+
+```bash
+cd victoria-metrics-cluster-mode && make deploy
+```
+
+See [victoria-metrics-cluster-mode/README.md](victoria-metrics-cluster-mode/README.md) for details.

@@ -1,0 +1,156 @@
+# Base VMAgent — overlays patch: zone affinity, DEDICATED_AZ_PLACEMENT env,
+# remoteWrite URL, and externalLabels.
+#
+# AZ-aware filtering uses VMAgent's env var substitution (%{ZONE_NAME}%)
+# in relabel configs — no hardcoded zone values needed in the base template.
+# The ZONE_NAME env is set via downwardAPI from the pod's topology label.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  name: vmagent
+  namespace: monitoring
+spec:
+  # -- Scheduling --
+  nodeSelector:
+    topology.kubernetes.io/zone: PLACEHOLDER
+
+  # -- Scaling --
+  replicaCount: 2
+  shardCount: 1
+
+  # -- Identity --
+  serviceAccountName: vmagent-vm
+  externalLabels:
+    cluster: playground
+    availability_zone: PLACEHOLDER
+
+  # -- Pod metadata --
+  podMetadata:
+    labels:
+      vm_agent_federation: "true"
+  podDisruptionBudget:
+    maxUnavailable: 1
+
+  # -- Container tuning --
+  containers:
+    - name: config-reloader
+      resources:
+        requests:
+          cpu: 3m
+          memory: 64Mi
+        limits:
+          cpu: 50m
+          memory: 64Mi
+  resources:
+    requests:
+      cpu: 160m
+      memory: 512Mi
+    limits:
+      memory: 512Mi
+
+  # -- Environment --
+  extraEnvs:
+    - name: GOMAXPROCS
+      value: "1"
+    - name: GOGC
+      value: "400"
+    - name: GOMEMLIMIT
+      value: 435MiB
+    - name: ZONE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.labels['topology.kubernetes.io/zone']
+    - name: DEDICATED_AZ_PLACEMENT
+      value: PLACEHOLDER
+
+  # -- Extra args --
+  extraArgs:
+    promscrape.dropOriginalLabels: "true"
+    promscrape.kubernetesSDCheckInterval: 60s
+    promscrape.maxScrapeSize: 128MiB
+    promscrape.streamParse: "true"
+    promscrape.suppressScrapeErrorsDelay: 120s
+    remoteWrite.queues: "40"
+
+  # -- Remote write (per-AZ vminsert) --
+  remoteWrite:
+    - url: PLACEHOLDER
+
+  # -- Scrape config --
+  scrapeInterval: 60s
+  selectAllByDefault: true
+
+  # -- Discovery selectors --
+  serviceScrapeNamespaceSelector: {}
+  serviceScrapeSelector: {}
+  podScrapeNamespaceSelector: {}
+  podScrapeSelector: {}
+  probeNamespaceSelector: {}
+  probeSelector: {}
+  nodeScrapeNamespaceSelector: {}
+  nodeScrapeSelector: {}
+  staticScrapeNamespaceSelector: {}
+  staticScrapeSelector: {}
+
+  # -- AZ-aware relabel templates --
+  # Node role targets: propagate node zone label to pod annotation,
+  # then filter by ZONE_NAME. Supports both legacy and current labels.
+  nodeScrapeRelabelTemplate:
+    - action: replace
+      regex: (.*);true
+      replacement: $1
+      sourceLabels:
+        - __meta_kubernetes_node_label_failure_domain_beta_kubernetes_io_zone
+        - __meta_kubernetes_node_labelpresent_failure_domain_beta_kubernetes_io_zone
+      targetLabel: __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+    - action: replace
+      regex: (.*);true
+      replacement: $1
+      sourceLabels:
+        - __meta_kubernetes_node_label_topology_kubernetes_io_zone
+        - __meta_kubernetes_node_labelpresent_topology_kubernetes_io_zone
+      targetLabel: __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+    - action: keep
+      regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
+      sourceLabels:
+        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+    - action: replace
+      sourceLabels:
+        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+      targetLabel: topology_kubernetes_io_zone
+
+  # Pod targets: filter by pod annotation
+  podScrapeRelabelTemplate:
+    - action: keep
+      regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
+      sourceLabels:
+        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+    - action: replace
+      sourceLabels:
+        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+      targetLabel: topology_kubernetes_io_zone
+
+  # Service targets: filter by pod annotation
+  serviceScrapeRelabelTemplate:
+    - action: keep
+      regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
+      sourceLabels:
+        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+    - action: replace
+      sourceLabels:
+        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+      targetLabel: topology_kubernetes_io_zone
+
+  # Probe targets: filter by topology label
+  probeScrapeRelabelTemplate:
+    - action: keep
+      regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
+      sourceLabels:
+        - topology_kubernetes_io_zone
+
+  # Static targets: filter by topology label
+  staticScrapeRelabelTemplate:
+    - action: keep
+      regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
+      sourceLabels:
+        - topology_kubernetes_io_zone

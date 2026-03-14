@@ -1,0 +1,17 @@
+# Catch-all Service in front of all per-AZ VMAgents.
+# Used by VMAlert for remoteWrite — PreferClose ensures writes go
+# to the local VMAgent replica, minimizing cross-AZ traffic.
+apiVersion: v1
+kind: Service
+metadata:
+  name: vmagent-catchall
+  namespace: monitoring
+spec:
+  type: ClusterIP
+  trafficDistribution: PreferClose
+  selector:
+    vm_agent_federation: "true"
+  ports:
+    - name: http
+      port: 8429
+      targetPort: 8429

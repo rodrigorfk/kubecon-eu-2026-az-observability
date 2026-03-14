@@ -1,0 +1,60 @@
+# Base VMCluster — overlays patch: name, zone nodeSelectors.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMCluster
+metadata:
+  name: vmcluster
+  namespace: monitoring
+spec:
+  retentionPeriod: "7d"
+  replicationFactor: 1
+
+  vminsert:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+    nodeSelector:
+      topology.kubernetes.io/zone: PLACEHOLDER
+
+  vmstorage:
+    replicaCount: 1
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: [ReadWriteOnce]
+          resources:
+            requests:
+              storage: 5Gi
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+    nodeSelector:
+      topology.kubernetes.io/zone: PLACEHOLDER
+
+  vmselect:
+    replicaCount: 1
+    # Expose cluster-native protocol for multi-level vmselect federation.
+    extraArgs:
+      clusternativeListenAddr: ":8401"
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+    nodeSelector:
+      topology.kubernetes.io/zone: PLACEHOLDER
+    serviceSpec:
+      useAsDefault: true
+      spec:
+        ports:
+          - name: clusternative
+            port: 8401
+            protocol: TCP
+            targetPort: 8401
