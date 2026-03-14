@@ -10,6 +10,9 @@ patches:
   - target:
       kind: PrometheusAgent
       name: prometheus-agent
+    # The 1a agent acts as a "catch-all" for any targets in the AZ that aren't filtered by scrapeClasses (e.g. via node role or pod annotation/label). 
+    # So we use a wide regex that matches any target with the AZ value in its discovered metadata, regardless of where it appears 
+    # (e.g. node label, pod annotation, pod label, EC2 meta).
     patch: |
       - op: replace
         path: /spec/nodeSelector/topology.kubernetes.io~1zone
@@ -19,7 +22,7 @@ patches:
         value: eu-west-1a
       - op: replace
         path: /spec/scrapeClasses/0/relabelings/0/regex
-        value: ".*eu-west-1a.*"
+        value: "(.*eu-west-1a.*|;;)"
       - op: replace
         path: /spec/scrapeClasses/1/relabelings/0/regex
         value: "eu-west-1a"

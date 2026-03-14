@@ -19,7 +19,7 @@ spec:
             - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
             - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
             - __meta_ec2_availability_zone
-          regex: ".*PLACEHOLDER.*"
+          regex: "PLACEHOLDER"
           action: keep
     - name: az-filter-kubelet
       default: false
