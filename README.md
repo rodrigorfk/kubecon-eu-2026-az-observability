@@ -5,7 +5,7 @@ Built as a companion to the KubeCon EU 2026 talk: **"Cutting Metrics Traffic, Cu
 
 ## Cluster Topology
 
-The Kind cluster simulates a single AWS region (`eu-west-1`) with 3 availability zones:
+The Kind cluster simulates a single AWS region (`eu-west-1`) with 3 availability zones, using 8 nodes (2 control-plane + 6 workers):
 
 ```
 eu-west-1
@@ -25,6 +25,10 @@ eu-west-1
 Each node is labeled with the standard Kubernetes topology labels:
 - `topology.kubernetes.io/region: eu-west-1`
 - `topology.kubernetes.io/zone: eu-west-1{a,b,c}`
+
+### HA Control Plane
+
+Two control-plane nodes are spread across eu-west-1a and eu-west-1b. Kind automatically provisions an haproxy load balancer in front of the API servers. Note: with 2 nodes, etcd quorum is not fault-tolerant (requires 3 for true HA), but this is sufficient for simulating AZ topology.
 
 ### Control Plane Metrics
 
@@ -59,6 +63,9 @@ make create
 # Check cluster status and node AZ distribution
 make status
 
+# Deploy the AZ-aware Prometheus stack
+cd prometheus-agent-mode && make deploy
+
 # Tear it down
 make delete
 ```
@@ -89,7 +96,7 @@ Without this, kube-proxy and other components fail with `too many open files`.
 ```
 playground/
 ├── Makefile                  # Cluster lifecycle management
-├── kind-config.yaml          # Kind cluster definition (8 nodes, 3 AZs)
+├── kind-config.yaml          # Kind cluster definition (8 nodes, 3 AZs, HA control plane)
 ├── README.md                 # This file
 ├── envoy-gateway/            # Ingress controller setup (Envoy Gateway + Gateway API)
 │   └── README.md
@@ -111,5 +118,11 @@ Once the cluster is running, deploy the AZ-aware Prometheus setup:
 cd prometheus-agent-mode
 make deploy
 ```
+
+This deploys:
+- **prometheus-operator** + node-exporter + kube-state-metrics (via kube-prometheus-stack)
+- **Prometheus server** — centralized TSDB with remote-write receiver and PrometheusRules
+- **3 per-AZ PrometheusAgents** — each scrapes only targets in its availability zone
+- **Kubelet ScrapeConfigs** — replacing the default ServiceMonitor for AZ-aware kubelet scraping
 
 See [prometheus-agent-mode/README.md](prometheus-agent-mode/README.md) for the full architecture and usage.
