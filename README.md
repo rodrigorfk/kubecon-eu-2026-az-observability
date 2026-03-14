@@ -1,7 +1,7 @@
 # Playground — Multi-AZ Kubernetes Cluster
 
 A local Kubernetes environment that simulates an AWS multi-AZ deployment using [Kind](https://github.com/kubernetes-sigs/kind/).
-Built as a companion to the KubeCon EU 2026 talk: **"Cutting Metrics Traffic, Cutting Costs: The AZ-Aware Observability Blueprint"**.
+Built as a companion to the KubeCon EU 2026 talk: **"[Cutting Metrics Traffic, Cutting Costs: The AZ-Aware Observability Blueprint](https://kccnceu2026.sched.com/event/2CW5m/cutting-metrics-traffic-cutting-costs-the-az-aware-observability-blueprint-iris-dyrmishi-rodrigo-fior-kuntzer-miro?iframe=no)"**.
 
 ## Cluster Topology
 
