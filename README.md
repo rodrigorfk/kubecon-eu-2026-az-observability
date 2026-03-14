@@ -126,9 +126,9 @@ cd prometheus-agent-mode && make deploy
 
 See [prometheus-agent-mode/README.md](prometheus-agent-mode/README.md) for details.
 
-### Option 2: VictoriaMetrics Cluster Mode (full AZ isolation)
+### Option 2: VictoriaMetrics Cluster Mode (minimized cross-AZ traffic)
 
-Complete end-to-end AZ isolation: per-AZ VMAgent → per-AZ VMCluster (vminsert/vmstorage/vmselect) → federated vmselect → VMAlert. Zero cross-AZ traffic for the observability pipeline.
+Per-AZ VMAgent → per-AZ VMCluster (vminsert/vmstorage/vmselect) → federated vmselect → VMAlert. Cross-AZ traffic is reduced to the bare minimum: only the federated vmselect queries per-AZ vmselect nodes across zone boundaries at read time. The write path (scraping + ingestion + storage) is fully AZ-local. True zero cross-AZ traffic is not achievable since queries must fan out to all AZs to provide a unified view.
 
 ```bash
 cd victoria-metrics-cluster-mode && make deploy
