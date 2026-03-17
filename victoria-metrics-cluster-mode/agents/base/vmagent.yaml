@@ -102,21 +102,21 @@ spec:
       sourceLabels:
         - __meta_kubernetes_node_label_failure_domain_beta_kubernetes_io_zone
         - __meta_kubernetes_node_labelpresent_failure_domain_beta_kubernetes_io_zone
-      targetLabel: __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+      targetLabel: __meta_kubernetes_pod_label_topology_kubernetes_io_zone
     - action: replace
       regex: (.*);true
       replacement: $1
       sourceLabels:
         - __meta_kubernetes_node_label_topology_kubernetes_io_zone
         - __meta_kubernetes_node_labelpresent_topology_kubernetes_io_zone
-      targetLabel: __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+      targetLabel: __meta_kubernetes_pod_label_topology_kubernetes_io_zone
     - action: keep
       regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
       sourceLabels:
-        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
     - action: replace
       sourceLabels:
-        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
       targetLabel: topology_kubernetes_io_zone
 
   # Pod targets: filter by pod annotation
@@ -124,10 +124,10 @@ spec:
     - action: keep
       regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
       sourceLabels:
-        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
     - action: replace
       sourceLabels:
-        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
       targetLabel: topology_kubernetes_io_zone
 
   # Service targets: filter by pod annotation
@@ -135,10 +135,10 @@ spec:
     - action: keep
       regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
       sourceLabels:
-        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
     - action: replace
       sourceLabels:
-        - __meta_kubernetes_pod_annotation_topology_kubernetes_io_zone
+        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
       targetLabel: topology_kubernetes_io_zone
 
   # Probe targets: filter by topology label
