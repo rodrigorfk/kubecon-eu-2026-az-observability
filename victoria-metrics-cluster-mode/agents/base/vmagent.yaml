@@ -65,7 +65,7 @@ spec:
 
   # -- Extra args --
   extraArgs:
-    promscrape.dropOriginalLabels: "true"
+    promscrape.dropOriginalLabels: "false"
     promscrape.kubernetesSDCheckInterval: 60s
     promscrape.maxScrapeSize: 128MiB
     promscrape.streamParse: "true"
@@ -114,10 +114,6 @@ spec:
       regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
       sourceLabels:
         - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
-    - action: replace
-      sourceLabels:
-        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
-      targetLabel: topology_kubernetes_io_zone
 
   # Pod targets: filter by pod annotation
   podScrapeRelabelTemplate:
@@ -125,10 +121,6 @@ spec:
       regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
       sourceLabels:
         - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
-    - action: replace
-      sourceLabels:
-        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
-      targetLabel: topology_kubernetes_io_zone
 
   # Service targets: filter by pod annotation
   serviceScrapeRelabelTemplate:
@@ -136,10 +128,6 @@ spec:
       regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
       sourceLabels:
         - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
-    - action: replace
-      sourceLabels:
-        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
-      targetLabel: topology_kubernetes_io_zone
 
   # Probe targets: filter by topology label
   probeScrapeRelabelTemplate:
