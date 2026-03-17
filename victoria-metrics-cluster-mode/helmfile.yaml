@@ -18,9 +18,37 @@ releases:
   - name: victoria-metrics-k8s-stack
     namespace: monitoring
     createNamespace: false
+    needs:
+      - monitoring/kube-prometheus-stack
     chart: victoriametrics/victoria-metrics-k8s-stack
     version: "0.72.4"
     values:
       - values/victoria-metrics-k8s-stack.yaml
     wait: true
     waitForJobs: true
+    hooks:
+      # Restart operator after install/upgrade to pick up the prometheus-operator CRD changes (e.g. ServiceMonitor → VMServiceScrape)
+      - events: ["postsync"]
+        showlogs: true
+        command: kubectl
+        args:
+          - rollout
+          - restart
+          - deployment/victoria-metrics-k8s-stack-victoria-metrics-operator
+          - -n
+          - monitoring
+      - events: ["postsync"]
+        showlogs: true
+        command: kubectl
+        args:
+          - rollout
+          - status
+          - deployment/victoria-metrics-k8s-stack-victoria-metrics-operator
+          - -n
+          - monitoring
+          - --timeout=120s
+      - events: ["postsync"]
+        showlogs: true
+        command: sleep
+        args:
+          - "15"
