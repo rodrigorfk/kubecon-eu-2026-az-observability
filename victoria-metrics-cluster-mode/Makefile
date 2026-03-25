@@ -21,7 +21,7 @@ deploy: deploy-operator deploy-base deploy-clusters deploy-agents ## Deploy ever
 
 deploy-operator: ## Install prometheus-operator + victoriametrics-operator via helmfile
 	@$(KUBECTL) apply -f base/namespace.yaml > /dev/null
-	@echo " ✓ Namespace ready"
+	@echo " ✓ Namespace ready, starting operator deployment"
 	@helmfile --file helmfile.yaml sync --quiet
 	@echo " ✓ Helmfile sync complete"
 	@echo "Waiting for prometheus-operator components..."
