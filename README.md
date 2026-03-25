@@ -187,10 +187,10 @@ Run this query before and after deploying an AZ-aware platform to measure the tr
 
 | Platform                        | Cross-AZ bytes/min |
 |---------------------------------|--------------------|
-| `victoria-metrics-baseline`     | ~30,100,000        |
-| `victoria-metrics-cluster-mode` | ~6,835,000         |
+| `victoria-metrics-baseline`     | ~37,480,000        |
+| `victoria-metrics-cluster-mode` | ~9,900,000         |
 
-**~77% reduction** in cross-AZ traffic from the AZ-aware setup.
+**~74% reduction** in cross-AZ traffic from the AZ-aware setup.
 
 **Baseline** (`victoria-metrics-baseline`) — single unaware stack:
 
