@@ -1,0 +1,65 @@
+# Single VMCluster — no zone constraints, components schedule anywhere.
+# This is the "before" state: cross-AZ traffic is expected and unmeasured.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMCluster
+metadata:
+  name: vm-baseline
+  namespace: monitoring
+spec:
+  retentionPeriod: "7d"
+  replicationFactor: 1
+
+  vminsert:
+    replicaCount: 1
+    extraEnvs:
+      - name: GOMAXPROCS
+        value: "1"
+      - name: GOMEMLIMIT
+        valueFrom:
+          resourceFieldRef:
+            resource: limits.memory
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+
+  vmstorage:
+    replicaCount: 1
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: [ReadWriteOnce]
+          resources:
+            requests:
+              storage: 5Gi
+    extraEnvs:
+      - name: GOMAXPROCS
+        value: "1"
+      - name: GOMEMLIMIT
+        valueFrom:
+          resourceFieldRef:
+            resource: limits.memory
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+  vmselect:
+    replicaCount: 1
+    extraEnvs:
+      - name: GOMAXPROCS
+        value: "1"
+      - name: GOMEMLIMIT
+        valueFrom:
+          resourceFieldRef:
+            resource: limits.memory
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi

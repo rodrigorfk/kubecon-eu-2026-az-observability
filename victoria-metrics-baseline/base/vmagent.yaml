@@ -1,0 +1,67 @@
+# Single VMAgent — no AZ pinning, no zone filtering, scrapes all targets.
+# This is the "before" state: the agent may scrape targets in any zone,
+# generating cross-AZ traffic for every scrape that crosses zone boundaries.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  name: vmagent
+  namespace: monitoring
+spec:
+  replicaCount: 2
+  shardCount: 1
+
+  serviceAccountName: vmagent-vm
+  externalLabels:
+    cluster: playground
+
+  podDisruptionBudget:
+    maxUnavailable: 1
+
+  containers:
+    - name: config-reloader
+      resources:
+        requests:
+          cpu: 3m
+          memory: 64Mi
+        limits:
+          cpu: 50m
+          memory: 64Mi
+  resources:
+    requests:
+      cpu: 160m
+      memory: 512Mi
+    limits:
+      memory: 512Mi
+
+  extraEnvs:
+    - name: GOMAXPROCS
+      value: "1"
+    - name: GOMEMLIMIT
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
+
+  extraArgs:
+    promscrape.dropOriginalLabels: "false"
+    promscrape.kubernetesSDCheckInterval: 60s
+    promscrape.maxScrapeSize: 128MiB
+    promscrape.streamParse: "true"
+    promscrape.suppressScrapeErrorsDelay: 120s
+    remoteWrite.queues: "40"
+
+  remoteWrite:
+    - url: http://vminsert-vm-baseline.monitoring.svc.cluster.local:8480/insert/0/prometheus/api/v1/write
+
+  scrapeInterval: 60s
+  selectAllByDefault: true
+
+  serviceScrapeNamespaceSelector: {}
+  serviceScrapeSelector: {}
+  podScrapeNamespaceSelector: {}
+  podScrapeSelector: {}
+  probeNamespaceSelector: {}
+  probeSelector: {}
+  nodeScrapeNamespaceSelector: {}
+  nodeScrapeSelector: {}
+  staticScrapeNamespaceSelector: {}
+  staticScrapeSelector: {}

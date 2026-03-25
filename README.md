@@ -102,7 +102,8 @@ playground/
 │   └── README.md
 ├── prometheus-agent-mode/         # AZ-aware Prometheus agents + central server
 │   └── README.md
-├── victoria-metrics-cluster-mode/ # Full AZ-isolated VictoriaMetrics stack
+├── victoria-metrics-baseline/     # AZ-unaware VictoriaMetrics — the "before" state (high cross-AZ traffic)
+├── victoria-metrics-cluster-mode/ # AZ-isolated VictoriaMetrics — the "after" state (minimized cross-AZ traffic)
 │   └── README.md
 ├── podinfo/                       # Test workload — 25 replicas across AZs
 └── beyla/                         # eBPF network observability — cross-AZ traffic measurement
@@ -116,7 +117,15 @@ See [envoy-gateway/README.md](envoy-gateway/README.md) for details.
 
 ## Deploying the Observability Stack
 
-Two observability platforms are available — choose one:
+Three observability platforms are available — deploy one at a time (they all use the `monitoring` namespace):
+
+### Option 0: VictoriaMetrics Baseline — the "before" state
+
+Single VMAgent + single VMCluster with no AZ constraints. Components land on any node and scrape any target, generating high cross-AZ traffic. Use this to establish the baseline before applying AZ-aware optimizations.
+
+```bash
+cd victoria-metrics-baseline && make deploy
+```
 
 ### Option 1: Prometheus Agent Mode (AZ-aware collection only)
 

@@ -1,0 +1,31 @@
+# VMAlert — evaluates VMRules (auto-converted from PrometheusRules).
+# Reads from and writes back to the single VMCluster vmselect.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlert
+metadata:
+  name: vmalert
+  namespace: monitoring
+spec:
+  replicaCount: 1
+  datasource:
+    url: http://vmselect-vm-baseline.monitoring.svc.cluster.local:8481/select/0/prometheus
+  remoteWrite:
+    url: http://vmagent-vmagent.monitoring.svc.cluster.local:8429/api/v1/write
+  remoteRead:
+    url: http://vmselect-vm-baseline.monitoring.svc.cluster.local:8481/select/0/prometheus
+  notifiers:
+    - url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
+  selectAllByDefault: true
+  extraEnvs:
+    - name: GOMAXPROCS
+      value: "1"
+    - name: GOMEMLIMIT
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi

@@ -1,0 +1,86 @@
+# Operator-only mode — all VM instances (VMAgent, VMCluster, VMAlert)
+# are managed via kustomize, not this chart.
+
+victoria-metrics-operator:
+  enabled: true
+  crds:
+    plain: true
+  serviceMonitor:
+    enabled: false
+  operator:
+    # Auto-convert prometheus-operator CRDs (ServiceMonitor → VMServiceScrape, etc.)
+    disable_prometheus_converter: false
+  env:
+    - name: GOMAXPROCS
+      value: "1"
+    - name: GOMEMLIMIT
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+# Disable all VM instances — we create our own via kustomize
+vmsingle:
+  enabled: false
+
+vmcluster:
+  enabled: false
+
+vmagent:
+  enabled: false
+
+vmalert:
+  enabled: false
+
+alertmanager:
+  enabled: false
+
+vmauth:
+  enabled: false
+
+grafana:
+  enabled: false
+
+# Disable chart dashboards (no Grafana)
+defaultDashboards:
+  enabled: false
+
+# Disable chart rules — kube-prometheus-stack provides PrometheusRules
+# which the operator auto-converts to VMRules
+defaultRules:
+  create: false
+
+# Disable chart scrape targets — kube-prometheus-stack provides these
+# as ServiceMonitors, auto-converted to VMServiceScrapes
+kubelet:
+  enabled: false
+
+kubeApiServer:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+coreDns:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeProxy:
+  enabled: false
+
+# Already provided by kube-prometheus-stack
+prometheus-node-exporter:
+  enabled: false
+
+kube-state-metrics:
+  enabled: false
