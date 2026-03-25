@@ -134,11 +134,11 @@ spec:
     - action: keep
       regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
       sourceLabels:
-        - topology_kubernetes_io_zone
+        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
 
   # Static targets: filter by topology label
   staticScrapeRelabelTemplate:
     - action: keep
       regex: (^(%{ZONE_NAME}%{DEDICATED_AZ_PLACEMENT})$)
       sourceLabels:
-        - topology_kubernetes_io_zone
+        - __meta_kubernetes_pod_label_topology_kubernetes_io_zone
