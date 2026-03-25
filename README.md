@@ -174,3 +174,28 @@ cd beyla && make deploy
 - One pod per node (8 total) via DaemonSet with `tolerations: - operator: Exists`
 - Captures inter-zone network flows using eBPF socket filters with `preset: network`
 - ServiceMonitor with 15s scrape interval
+
+To check total cross-AZ bytes over the last minute (both zone labels must be known):
+
+```promql
+sum(increase(beyla_network_inter_zone_bytes_total{dst_zone!="",src_zone!=""}[1m]))
+```
+
+Run this query before and after deploying an AZ-aware platform to measure the traffic reduction.
+
+### Example results
+
+| Platform                        | Cross-AZ bytes/min |
+|---------------------------------|--------------------|
+| `victoria-metrics-baseline`     | ~30,100,000        |
+| `victoria-metrics-cluster-mode` | ~6,835,000         |
+
+**~77% reduction** in cross-AZ traffic from the AZ-aware setup.
+
+**Baseline** (`victoria-metrics-baseline`) — single unaware stack:
+
+![Baseline cross-AZ traffic](screenshots/beyla-victoria-metrics-baseline.png)
+
+**After** (`victoria-metrics-cluster-mode`) — per-AZ stack with AZ-aware agents:
+
+![AZ-aware cross-AZ traffic](screenshots/beyla-victoria-metrics-cluster-mode.png)
