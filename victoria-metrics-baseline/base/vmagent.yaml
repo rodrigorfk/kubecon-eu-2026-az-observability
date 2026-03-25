@@ -41,6 +41,12 @@ spec:
         resourceFieldRef:
           resource: limits.memory
 
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: DoNotSchedule
+      matchLabelKeys: ["pod-template-hash"] 
+
   extraArgs:
     promscrape.dropOriginalLabels: "false"
     promscrape.kubernetesSDCheckInterval: 60s

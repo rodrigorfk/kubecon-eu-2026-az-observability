@@ -10,7 +10,7 @@ spec:
   replicationFactor: 1
 
   vminsert:
-    replicaCount: 1
+    replicaCount: 2
     extraEnvs:
       - name: GOMAXPROCS
         value: "1"
@@ -24,9 +24,14 @@ spec:
         memory: 128Mi
       limits:
         memory: 256Mi
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: DoNotSchedule
+        matchLabelKeys: ["pod-template-hash"] 
 
   vmstorage:
-    replicaCount: 1
+    replicaCount: 2
     storage:
       volumeClaimTemplate:
         spec:
@@ -47,9 +52,14 @@ spec:
         memory: 256Mi
       limits:
         memory: 512Mi
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: DoNotSchedule
+        matchLabelKeys: ["controller-revision-hash"] 
 
   vmselect:
-    replicaCount: 1
+    replicaCount: 2
     extraEnvs:
       - name: GOMAXPROCS
         value: "1"
@@ -63,3 +73,8 @@ spec:
         memory: 128Mi
       limits:
         memory: 256Mi
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: DoNotSchedule
+        matchLabelKeys: ["controller-revision-hash"] 
