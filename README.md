@@ -109,7 +109,7 @@ playground/
 
 ## Ingress
 
-The first control-plane node maps `hostPort:80 → containerPort:30080`. Envoy Gateway is deployed as a NodePort service on that port, enabling access to in-cluster services via `*.127.0.0.1.nip.io` hostnames directly from the host machine.
+The first control-plane node maps `hostPort:80 → containerPort:30080`. Envoy Gateway runs as a NodePort service on that port. A single shared Gateway named `playground` (in `envoy-gateway-system`) serves as the entry point for all `*.127.0.0.1.nip.io` hostnames. A ReferenceGrant allows HTTPRoutes from any namespace to attach to it — each platform and workload creates its own HTTPRoutes without needing to manage the Gateway itself.
 
 See [envoy-gateway/README.md](envoy-gateway/README.md) for details.
 

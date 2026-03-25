@@ -6,4 +6,4 @@ resources:
   - rbac.yaml
   - prometheus-server.yaml
   - scrapeconfig-kubelet.yaml
-  - gateway.yaml
+  - httproute.yaml

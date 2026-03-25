@@ -16,14 +16,13 @@ topologySpreadConstraints:
       matchLabels:
         app.kubernetes.io/name: podinfo
 
-# Expose via Gateway API HTTPRoute — uses the monitoring-gateway created by the
+# Expose via Gateway API HTTPRoute — uses the playground Gateway created by the
 # observability platform. Deploy an observability platform first.
 httpRoute:
   enabled: true
   parentRefs:
-    - name: monitoring-gateway
-      namespace: monitoring
-      sectionName: http
+    - name: playground
+      namespace: envoy-gateway-system
   hostnames:
     - podinfo.127.0.0.1.nip.io
   rules:

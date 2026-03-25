@@ -175,7 +175,7 @@ victoria-metrics-cluster-mode/
 │   ├── vmalert.yaml                       # VMAlert CRD
 │   ├── vmagent-catchall-service.yaml      # Catch-all Service for VMAgents
 │   ├── vmnodescrape-kubelet.yaml          # Kubelet VMNodeScrape (metrics, cadvisor, probes)
-│   └── gateway.yaml                       # Gateway + HTTPRoutes
+│   └── httproute.yaml                     # HTTPRoutes (vmselect, vmalert, alertmanager)
 ├── clusters/
 │   ├── base/
 │   │   ├── kustomization.yaml

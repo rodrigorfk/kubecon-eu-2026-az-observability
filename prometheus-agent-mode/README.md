@@ -120,7 +120,7 @@ make render
 |-------------------|------------------------------------------------|
 | `deploy`          | Deploy everything (operator + base + agents)   |
 | `deploy-operator` | Install prometheus-operator via helmfile        |
-| `deploy-base`     | Apply namespace, RBAC, Prometheus server, kubelet ScrapeConfigs, gateway |
+| `deploy-base`     | Apply namespace, RBAC, Prometheus server, kubelet ScrapeConfigs, HTTPRoutes |
 | `deploy-agents`   | Apply per-AZ PrometheusAgent overlays          |
 | `destroy`         | Tear down everything (reverse order)           |
 | `destroy-agents`  | Remove per-AZ agents                           |
@@ -155,7 +155,7 @@ prometheus-agent-mode/
 │   ├── rbac.yaml                         # ServiceAccounts + RBAC
 │   ├── prometheus-server.yaml            # Central Prometheus + Service (rules enabled)
 │   ├── scrapeconfig-kubelet.yaml         # Kubelet ScrapeConfigs (metrics, cadvisor, probes)
-│   └── gateway.yaml                      # Gateway + HTTPRoute for server
+│   └── httproute.yaml                    # HTTPRoutes for server and alertmanager
 └── agents/
     ├── base/
     │   ├── kustomization.yaml

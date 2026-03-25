@@ -7,6 +7,7 @@ Ingress controller for the playground cluster using [Envoy Gateway](https://gate
 1. **Envoy Gateway** (v1.7.1) — installed via Helmfile into `envoy-gateway-system` namespace
 2. **EnvoyProxy** resource — pins the Envoy data plane pod to the Kind control-plane node labeled `ingress-ready: "true"`, and configures a NodePort service on port `30080`
 3. **GatewayClass `eg`** — references the EnvoyProxy config; all Gateways in the cluster use this class
+4. **Shared Gateway `playground`** — single HTTP listener on port 80 in `envoy-gateway-system`, accepts HTTPRoutes from all namespaces
 
 ## How Ingress Works
 
@@ -16,10 +17,12 @@ The Kind cluster maps `hostPort:80` on the first control-plane node to `containe
 Host machine :80  →  Kind node :30080  →  Envoy proxy :10080  →  upstream services
 ```
 
-Any HTTPRoute using the `eg` GatewayClass becomes accessible from the host via `*.127.0.0.1.nip.io` hostnames. For example:
+The shared `playground` Gateway is the single entry point for all `*.127.0.0.1.nip.io` hostnames. Each platform and workload creates its own HTTPRoutes that attach to this Gateway via a cross-namespace `parentRef`.
 
-- `http://prometheus.127.0.0.1.nip.io` — Prometheus server
-- `http://prometheus-agent-1a.127.0.0.1.nip.io` — Agent in eu-west-1a
+Examples:
+- `http://prometheus.127.0.0.1.nip.io` — Prometheus server (prometheus-agent-mode)
+- `http://vmselect.127.0.0.1.nip.io` — Federated vmselect (victoria-metrics-cluster-mode)
+- `http://podinfo.127.0.0.1.nip.io` — Podinfo workload
 
 ## Usage
 
@@ -55,5 +58,5 @@ envoy-gateway/
 │   └── envoy-gateway.yaml        # Chart values
 └── base/
     ├── kustomization.yaml
-    └── gateway.yaml              # EnvoyProxy (NodePort on 30080) + GatewayClass "eg"
+    └── gateway.yaml              # EnvoyProxy + GatewayClass "eg" + shared Gateway "playground"
 ```

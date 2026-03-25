@@ -8,4 +8,4 @@ resources:
   - vmalert.yaml
   - vmagent-catchall-service.yaml
   - vmnodescrape-kubelet.yaml
-  - gateway.yaml
+  - httproute.yaml

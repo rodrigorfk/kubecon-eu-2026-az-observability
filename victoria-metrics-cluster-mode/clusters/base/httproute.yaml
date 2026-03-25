@@ -6,8 +6,8 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-    - name: monitoring-gateway
-      namespace: monitoring
+    - name: playground
+      namespace: envoy-gateway-system
   hostnames:
     - "vmselect-PLACEHOLDER.127.0.0.1.nip.io"
   rules:

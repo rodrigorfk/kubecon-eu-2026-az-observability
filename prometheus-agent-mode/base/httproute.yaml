@@ -1,15 +1,3 @@
-# Gateway — inherits EnvoyProxy config from the "eg" GatewayClass
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: monitoring-gateway
-  namespace: monitoring
-spec:
-  gatewayClassName: eg
-  listeners:
-    - name: http
-      protocol: HTTP
-      port: 80
 ---
 # HTTPRoute — prometheus.127.0.0.1.nip.io -> prometheus-server:9090
 apiVersion: gateway.networking.k8s.io/v1
@@ -19,8 +7,8 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-    - name: monitoring-gateway
-      namespace: monitoring
+    - name: playground
+      namespace: envoy-gateway-system
   hostnames:
     - "prometheus.127.0.0.1.nip.io"
   rules:
@@ -40,8 +28,8 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-    - name: monitoring-gateway
-      namespace: monitoring
+    - name: playground
+      namespace: envoy-gateway-system
   hostnames:
     - "alertmanager.127.0.0.1.nip.io"
   rules:

@@ -7,8 +7,8 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-    - name: monitoring-gateway
-      namespace: monitoring
+    - name: playground
+      namespace: envoy-gateway-system
   hostnames:
     - "agent-PLACEHOLDER.127.0.0.1.nip.io"
   rules:
