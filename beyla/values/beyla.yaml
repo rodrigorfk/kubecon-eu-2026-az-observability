@@ -1,0 +1,86 @@
+image:
+  tag: 3.6.0
+
+# Network observability preset — captures network flow bytes between pods,
+# including inter-zone traffic via beyla_network_inter_zone_bytes_total.
+preset: network
+
+# eBPF requires privileged mode in Kind containers
+privileged: true
+securityContext:
+  privileged: true
+
+# Required when network monitoring is enabled — hostNetwork causes cluster
+# DNS to fail without this policy
+dnsPolicy: ClusterFirstWithHostNet
+
+# Run on all nodes including control-plane to capture full cluster traffic
+tolerations:
+  - operator: Exists
+priorityClassName: system-node-critical
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 50Mi
+  limits:
+    memory: 128Mi
+
+env:
+  GOMAXPROCS: "1"
+
+envValueFrom:
+  GOMEMLIMIT:
+    resourceFieldRef:
+      resource: limits.memory
+
+# Expose Prometheus metrics endpoint for ServiceMonitor scraping
+service:
+  enabled: true
+
+serviceMonitor:
+  enabled: true
+  metrics:
+    endpoint:
+      interval: 15s
+
+config:
+  create: true
+  data:
+    attributes:
+      kubernetes:
+        enable: true
+      select:
+        beyla_network_flow_bytes:
+          enabled: false
+          include: []
+        beyla_network_inter_zone_bytes:
+          include:
+          - k8s.src.owner.name
+          - k8s.src.owner.type
+          - k8s.src.namespace
+          - k8s.dst.owner.name
+          - k8s.dst.owner.type
+          - k8s.dst.namespace
+          - src.zone
+          - dst.zone
+          - src.address
+          - dst.address
+          - src.cidr
+          - dst.cidr
+          - host.id
+    discovery:
+      instrument: []
+    filter:
+      network:
+        k8s_src_owner_type:
+          not_match: Service
+        k8s_dst_owner_type:
+          not_match: Service
+    network:
+      enable: true
+    prometheus_export:
+      port: 9090
+      path: /metrics
+      features:
+        - network_inter_zone

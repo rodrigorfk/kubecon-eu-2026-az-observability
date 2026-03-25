@@ -1,0 +1,14 @@
+repositories:
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+
+releases:
+  - name: beyla
+    namespace: beyla
+    createNamespace: true
+    chart: grafana/beyla
+    version: 1.14.0
+    values:
+      - values/beyla.yaml
+    wait: true
+    waitForJobs: true

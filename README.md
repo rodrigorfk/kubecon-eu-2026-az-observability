@@ -104,7 +104,8 @@ playground/
 │   └── README.md
 ├── victoria-metrics-cluster-mode/ # Full AZ-isolated VictoriaMetrics stack
 │   └── README.md
-└── podinfo/                       # Test workload — 25 replicas across AZs
+├── podinfo/                       # Test workload — 25 replicas across AZs
+└── beyla/                         # eBPF network observability — cross-AZ traffic measurement
 ```
 
 ## Ingress
@@ -150,3 +151,17 @@ cd podinfo && make deploy
 - 25 replicas spread evenly across the 3 AZs (~8-9 pods per zone) via `topologySpreadConstraints`
 - ServiceMonitor with 15s scrape interval — picked up automatically by PrometheusAgents / VMAgents
 - UI accessible at `http://podinfo.127.0.0.1.nip.io`
+
+## Network Observability: Beyla
+
+[Grafana Beyla](https://grafana.com/docs/beyla/latest/) uses eBPF to instrument network traffic at the kernel level with no code changes. It runs as a DaemonSet on every node and produces `beyla_network_inter_zone_bytes_total` — the metric that directly quantifies cross-AZ traffic per workload, making the cost impact of the observability pipeline visible.
+
+**Deploy after** one of the observability platforms (Beyla's ServiceMonitor is discovered automatically):
+
+```bash
+cd beyla && make deploy
+```
+
+- One pod per node (8 total) via DaemonSet with `tolerations: - operator: Exists`
+- Captures inter-zone network flows using eBPF socket filters with `preset: network`
+- ServiceMonitor with 15s scrape interval
