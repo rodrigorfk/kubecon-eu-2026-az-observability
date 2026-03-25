@@ -102,8 +102,9 @@ playground/
 │   └── README.md
 ├── prometheus-agent-mode/         # AZ-aware Prometheus agents + central server
 │   └── README.md
-└── victoria-metrics-cluster-mode/ # Full AZ-isolated VictoriaMetrics stack
-    └── README.md
+├── victoria-metrics-cluster-mode/ # Full AZ-isolated VictoriaMetrics stack
+│   └── README.md
+└── podinfo/                       # Test workload — 25 replicas across AZs
 ```
 
 ## Ingress
@@ -135,3 +136,17 @@ cd victoria-metrics-cluster-mode && make deploy
 ```
 
 See [victoria-metrics-cluster-mode/README.md](victoria-metrics-cluster-mode/README.md) for details.
+
+## Workload: Podinfo
+
+[Podinfo](https://github.com/stefanprodan/podinfo) is a lightweight Go microservice that exposes Prometheus metrics natively. It is deployed as a test workload to generate realistic metric volume and traffic patterns across the AZ-aware observability pipelines.
+
+**Deploy after** one of the observability platforms above (the HTTPRoute references the `monitoring-gateway` created by them).
+
+```bash
+cd podinfo && make deploy
+```
+
+- 25 replicas spread evenly across the 3 AZs (~8-9 pods per zone) via `topologySpreadConstraints`
+- ServiceMonitor with 15s scrape interval — picked up automatically by PrometheusAgents / VMAgents
+- UI accessible at `http://podinfo.127.0.0.1.nip.io`

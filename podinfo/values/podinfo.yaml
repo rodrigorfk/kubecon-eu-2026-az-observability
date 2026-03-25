@@ -1,0 +1,38 @@
+replicaCount: 25
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 64Mi
+
+# Spread pods evenly across availability zones
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: podinfo
+
+# Expose via Gateway API HTTPRoute — uses the monitoring-gateway created by the
+# observability platform. Deploy an observability platform first.
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: monitoring-gateway
+      namespace: monitoring
+      sectionName: http
+  hostnames:
+    - podinfo.127.0.0.1.nip.io
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+
+# ServiceMonitor for prometheus-operator / victoriametrics-operator discovery
+serviceMonitor:
+  enabled: true
+  interval: 15s

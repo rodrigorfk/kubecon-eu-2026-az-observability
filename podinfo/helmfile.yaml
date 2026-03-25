@@ -1,0 +1,14 @@
+repositories:
+  - name: podinfo
+    url: https://stefanprodan.github.io/podinfo
+
+releases:
+  - name: podinfo
+    namespace: podinfo
+    createNamespace: true
+    chart: podinfo/podinfo
+    version: 6.11.1
+    values:
+      - values/podinfo.yaml
+    wait: true
+    waitForJobs: true
