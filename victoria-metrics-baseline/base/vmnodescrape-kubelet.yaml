@@ -33,6 +33,9 @@ spec:
       sourceLabels:
         - __metrics_path__
       targetLabel: metrics_path
+    - action: replace
+      replacement: kubelet
+      targetLabel: job
   metricRelabelConfigs:
     - action: drop
       sourceLabels:
@@ -67,6 +70,9 @@ spec:
       sourceLabels:
         - __metrics_path__
       targetLabel: metrics_path
+    - action: replace
+      replacement: kubelet
+      targetLabel: job
   metricRelabelConfigs:
     - action: drop
       sourceLabels:
@@ -130,3 +136,6 @@ spec:
       sourceLabels:
         - __metrics_path__
       targetLabel: metrics_path
+    - action: replace
+      replacement: kubelet
+      targetLabel: job
